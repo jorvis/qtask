@@ -1,0 +1,98 @@
+## Overview
+
+I created Qtask to quickly record work/tasks I have done (or need to) from the command line, group them based on project, and easily generate reports.  Most parts are optional, but each element recorded has an ID, label, a datestamp, time committed, and associated project.
+
+The entries themselves are stored in a SQLite3 database (nothing fancy, just a file on disk.)
+
+
+## Usage
+
+I tried to make the usage follow natural language as much as possible rather than use a lot of command-line switches.
+
+First, initialize Qtask:
+
+```
+    qtask init
+```
+
+Optionally, create a project:
+
+```
+    qtask add project annotation
+```
+
+Record work done, a meeting, whatever:
+
+```
+    qtask log "Conference call with review panel"
+```
+
+Or, if you want to link the task to a project when you log it:
+
+```
+    qtask log annotation "Added parsing script for latest version of tool X"
+```
+
+### Listing things
+
+Show the projects you've added
+
+```
+    qtask list projects
+```
+
+List all work for a project (most recent first)
+
+```
+    qtask list annotation work
+```
+
+You can also do time intervals (deltas)
+
+```
+    qtask list work in last 30 days
+```
+
+And, of course, limit these by project too
+
+```
+    qtask list annotation work in last 1 week
+```
+
+### Generating reports (graphics)
+
+Nothing here yet
+
+
+## Help
+
+Get help on any command by using help, then the command name, such as:
+
+```
+qtask help init
+```
+
+
+## Getting the code
+
+The best way to get the code for now is to just clone it:
+
+```
+    git clone https://github.com/jorvis/qtask.git
+```
+
+Or you can get a zip file of the most current code at:
+
+```
+    https://github.com/jorvis/qtask/archive/master.zip
+```
+
+## Problems?
+
+If you encounter any issues or have suggestions,  please submit to the [Issue tracking system](https://github.com/jorvis/qtask/issues)
+
+
+Contributing
+============
+
+I welcome contributions, either in the form of code (pull requests) or suggestions e-mailed to me.
