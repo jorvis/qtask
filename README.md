@@ -33,6 +33,16 @@ Or, if you want to link the task to a project when you log it:
     qtask log annotation "Added parsing script for latest version of tool X"
 ```
 
+If you're interested in actually logging time rather than just lists of work you
+can do that too.  When you log new work you'll get a task ID reported back on the
+command line for it.  To actually log hours against that, you can do it like this:
+
+```
+qtask log 5 hours against task 231
+```
+
+If you don't know the ID, they are always displayed when listing work.
+
 ### Listing things
 
 Show the projects you've added
@@ -95,4 +105,4 @@ If you encounter any issues or have suggestions,  please submit to the [Issue tr
 Contributing
 ============
 
-I welcome contributions, either in the form of code (pull requests) or suggestions e-mailed to me.
+I welcome contributions, either in the form of code (pull requests) or suggestions submitted to the [tracker](https://github.com/jorvis/qtask/issues).
