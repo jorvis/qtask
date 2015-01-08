@@ -131,6 +131,22 @@ def print_help_for_command(cmd):
         already exists, Qtask will report an error and leave it untouched.
         """)
 
+    elif cmd == 'add':
+        print("""
+        Qtask help command: add
+        
+        The 'add' command is an administrative one, currently only used to add new projects
+        to the database against which work can be logged.
+
+        Example usage:
+
+           qtask add project 'T. parva'
+           qtask add project rna_seq
+
+        If your project name contains spaces or special characters, you should sound it with
+        quotation marks.
+        """)
+
     else:
         print_error("Qtask: Sorry, help for the command ({0}) is not yet implemented".format(cmd))
 
