@@ -57,7 +57,10 @@ def main():
             print_error("Qtask: Sorry, the list command is not yet implemented")
 
         elif command == 'add':
-            print_error("Qtask: Sorry, the add command is not yet implemented")
+            if len(args.arglist) != 3:
+                print_error("Usage: qtask add project <foo>")
+            else:
+                process_add_command(curs, args.arglist[1], args.arglist[2])
 
         elif command == 'help':
             if len(args.arglist) != 2:
@@ -111,10 +114,12 @@ def initialize_db(file_path):
     conn.commit()
     curs.close()
 
+    
 def print_error(msg):
     print(msg)
     sys.exit(1)
 
+    
 def print_help_for_command(cmd):
     if cmd == 'init':
         print("""
@@ -127,10 +132,18 @@ def print_help_for_command(cmd):
         """)
 
     else:
-        print("Qtask: Sorry, help for the command ({0}) is not yet implemented".format(cmd))
-        sys.exit(1)
-        
+        print_error("Qtask: Sorry, help for the command ({0}) is not yet implemented".format(cmd))
 
+        
+def process_add_command(curs, item_type, label):
+    print("Attempting to insert project: {0}".format(label))
+    if item_type == 'project':
+        curs.execute("INSERT INTO project (label, time_added) VALUES (?, datetime('now'))", (label,) )
+        row_id = curs.lastrowid
+        print("Qtask: Project '{0}' added to the database with id={1}".format(label, row_id))
+        return row_id
+    else:
+        print_error("Qtask: Sorry, there is currently only support for adding projects")
 
 if __name__ == '__main__':
     main()
