@@ -51,20 +51,19 @@ def main():
         curs = conn.cursor()
 
         if command == 'log':
-            print("Qtask: Sorry, the log command is not yet implemented")
-            sys.exit(1)
+            print_error("Qtask: Sorry, the log command is not yet implemented")
 
         elif command == 'list':
-            print("Qtask: Sorry, the list command is not yet implemented")
-            sys.exit(1)
+            print_error("Qtask: Sorry, the list command is not yet implemented")
 
         elif command == 'add':
-            print("Qtask: Sorry, the add command is not yet implemented")
-            sys.exit(1)
+            print_error("Qtask: Sorry, the add command is not yet implemented")
 
         elif command == 'help':
-            print("Qtask: Sorry, the help command is not yet implemented")
-            sys.exit(1)
+            if len(args.arglist) != 2:
+                print_error("Usage: qtask help <somecommand>")
+            else:
+                print_help_for_command(args.arglist[1])
 
         else:
             raise Exception("ERROR: Unrecognized qtask command: {0}".format(command))
@@ -111,6 +110,26 @@ def initialize_db(file_path):
 
     conn.commit()
     curs.close()
+
+def print_error(msg):
+    print(msg)
+    sys.exit(1)
+
+def print_help_for_command(cmd):
+    if cmd == 'init':
+        print("""
+        Qtask help command: init
+        
+        This command initializes a user-specific Qtask database (SQLite3) by setting up the 
+        tables necessary to store its data.  This creates a hidden file called '.qtask.db'
+        in your home area, as defined by the HOME environmental variable.  If the file 
+        already exists, Qtask will report an error and leave it untouched.
+        """)
+
+    else:
+        print("Qtask: Sorry, help for the command ({0}) is not yet implemented".format(cmd))
+        sys.exit(1)
+        
 
 
 if __name__ == '__main__':
