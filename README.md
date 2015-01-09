@@ -30,7 +30,7 @@ Record work done, a meeting, whatever:
 Or, if you want to link the task to a project when you log it:
 
 ```
-    qtask log annotation "Added parsing script for latest version of tool X"
+    qtask log "Added parsing script for latest version of tool X" to annotation
 ```
 
 If you're interested in actually logging time rather than just lists of work you
