@@ -158,6 +158,23 @@ def print_help_for_command(cmd):
         quotation marks.
         """)
 
+    elif cmd == 'log':
+        print("""
+        Qtask help command: log
+        
+        The 'log' command is used to record tasks performed.  The basic usage is to just provide a
+        label, which will be stored along with the current date/time.  You can expand upon this by
+        logging the task to a specific project by the project's label.  You can also log additional
+        time to an already-existent task.
+
+        Example usage:
+
+           qtask log "Installed latest version of BLAST"
+           qtask log "Created JBrowse instance" to t_parva
+           qtask log 5 hours against task 231
+
+        """)
+
     else:
         print_error("Qtask: Sorry, help for the command ({0}) is not yet implemented".format(cmd))
 
