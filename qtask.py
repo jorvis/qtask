@@ -201,7 +201,12 @@ def process_list_command(curs, args):
     # 1 argument: Currently only supports direct lists of 'projects' or 'work'
     if len(args) == 1:
         if args[0] == 'projects':
-            cursor.execute('''SELECT scientific_name FROM orgs WHERE tax_id=?''', (taxon_id,) )
+            curs.execute('''SELECT id, label, time_added FROM project ORDER BY LABEL''' )
+
+            print("Projects")
+            for (id, label, time_added) in curs:
+                print("{0}\t{1}\t{2}".format(id, label, time_added))
+            
         elif args[0] == 'work':
             pass
         else:
@@ -224,7 +229,9 @@ def process_log_command(curs, args):
         project_id = get_project_id_by_label(curs, project_label)
 
         if project_id is None:
-            pass
+            curs.execute("INSERT INTO task (label, time_added) VALUES (?, datetime('now'))",
+                         (args[0],) )
+            print("Qtask: task id:{0} logged to project {1}".format(curs.lastrowid, project_label))
         else:
             curs.execute("INSERT INTO task (label, time_added, project_id) VALUES (?, datetime('now'), ?)",
                          (args[0], project_id) )
