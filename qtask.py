@@ -19,6 +19,7 @@ Example commands supported:
     qtask log 5 hours against task 231
 
     qtask list projects
+    qtask list work
     qtask list annotation work
     qtask list work in last 30 days
     qtask list annotation work in last 1 week
@@ -56,7 +57,10 @@ def main():
                 process_log_command(curs, args.arglist)
 
         elif command == 'list':
-            print_error("Qtask: Sorry, the list command is not yet implemented")
+            if len(args.arglist) < 2:
+                print_error("Usage: qtask list <description>.  Please see help for more examples")
+            else:
+                process_list_command(curs, args.arglist)
 
         elif command == 'add':
             if len(args.arglist) != 3:
@@ -188,6 +192,20 @@ def process_add_command(curs, item_type, label):
         return row_id
     else:
         print_error("Qtask: Sorry, there is currently only support for adding projects")
+
+def process_list_command(curs, args):
+    # get rid of the first argument, which was just the 'list' command
+    args.pop(0)
+
+    # There are several different ways to call this.
+    # 1 argument: Currently only supports direct lists of 'projects' or 'work'
+    if len(args) == 1:
+        if args[0] == 'projects':
+            cursor.execute('''SELECT scientific_name FROM orgs WHERE tax_id=?''', (taxon_id,) )
+        elif args[0] == 'work':
+            pass
+        else:
+            print_error("Qtask: Sorry, I don't know how to list {0}".format(args[0]))
 
 
 def process_log_command(curs, args):
