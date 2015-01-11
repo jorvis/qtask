@@ -202,10 +202,15 @@ def process_list_command(curs, args):
     if len(args) == 1:
         if args[0] == 'projects':
             curs.execute('''SELECT id, label, time_added FROM project ORDER BY LABEL''' )
+            project_count = 0
 
             print("Projects")
             for (id, label, time_added) in curs:
-                print("{0}\t{1}\t{2}".format(id, label, time_added))
+                print("{0}\t{1}".format(label, time_added))
+                project_count += 1
+
+            if project_count == 0:
+                print("-- No projects found --")
             
         elif args[0] == 'work':
             pass
