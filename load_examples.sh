@@ -25,7 +25,10 @@ qtask log "Submitted work summary for the week"
 qtask log "Added EggNOG parsing script" to Annotation
 qtask log "Installated latest version of HMMER" to Annotation
 
-
+echo "\nDone.  Now try some of the following commands:"
+echo "  qtask list projects"
+echo "  qtask list Annotation work"
+echo "  qtask list 'T parva' work in last 2 weeks"
 
 
 
