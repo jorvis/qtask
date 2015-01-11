@@ -234,9 +234,7 @@ def process_log_command(curs, args):
         project_id = get_project_id_by_label(curs, project_label)
 
         if project_id is None:
-            curs.execute("INSERT INTO task (label, time_added) VALUES (?, datetime('now'))",
-                         (args[0],) )
-            print("Qtask: task id:{0} logged to project {1}".format(curs.lastrowid, project_label))
+            print_error("Qtask: ERROR: couldn't find project '{0}' to log work against".format(project_label))
         else:
             curs.execute("INSERT INTO task (label, time_added, project_id) VALUES (?, datetime('now'), ?)",
                          (args[0], project_id) )
