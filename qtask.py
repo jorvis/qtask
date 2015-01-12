@@ -204,16 +204,32 @@ def process_list_command(curs, args):
             curs.execute('''SELECT id, label, time_added FROM project ORDER BY LABEL''' )
             project_count = 0
 
-            print("Projects")
+            print("# Projects\n# --------")
             for (id, label, time_added) in curs:
                 print("{0}\t{1}".format(label, time_added))
                 project_count += 1
 
             if project_count == 0:
-                print("-- No projects found --")
+                print("#- No projects found -#")
             
         elif args[0] == 'work':
-            pass
+            curs.execute(
+                '''
+                SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
+                  FROM task t
+                       JOIN project p ON t.project_id=p.id
+                  ORDER BY t.time_added DESC
+                '''
+            )
+            work_count = 0
+
+            print("# Work logged\n# -----------")
+            for (task_label, time_added, time_logged, project_name) in curs:
+                work_count += 1
+                print("{0}\t{1}\t{2}\t{3}".format(task_label, project_name, time_added, time_logged))
+
+            if work_count == 0:
+                print("#- No work logged -#")
         else:
             print_error("Qtask: Sorry, I don't know how to list {0}".format(args[0]))
 
