@@ -185,7 +185,14 @@ def print_help_for_command(cmd):
         
 def process_add_command(curs, item_type, label):
     print("Attempting to insert project: {0}".format(label))
+
+    # parsing wouldn't work if any of these words were used as a project name
+    project_reserved_words = ['work']
+    
     if item_type == 'project':
+        if label in project_reserved_words:
+            print_error("Qtask: Sorry, the word '{0}' is reserved and can't be used for a project name.".format(label))
+        
         curs.execute("INSERT INTO project (label, time_added) VALUES (?, datetime('now'))", (label,) )
         row_id = curs.lastrowid
         print("Qtask: Project '{0}' added to the database with id={1}".format(label, row_id))
@@ -230,6 +237,9 @@ def process_list_command(curs, args):
 
             if work_count == 0:
                 print("#- No work logged -#")
+
+        elif len(args) == 2:
+            pass
         else:
             print_error("Qtask: Sorry, I don't know how to list {0}".format(args[0]))
 
