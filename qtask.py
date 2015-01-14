@@ -216,9 +216,9 @@ def print_help_for_command(cmd):
 
             qtask list projects
             qtask list work
-            qtask list annotation work
+            qtask list Annotation work
             qtask list work in last 30 days
-            qtask list annotation work in last 1 week
+            qtask list Annotation work in last 1 week
 
         """)
         
