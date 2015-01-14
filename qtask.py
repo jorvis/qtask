@@ -16,6 +16,7 @@ Example commands supported:
  
     qtask log "Conference call with review panel"
     qtask log "Added parsing script for latest version of tool X" to annotation
+    qtask log "Submitted timesheets" on 2015-01-13
     qtask log 5 hours against task 231
 
     qtask list projects
@@ -134,7 +135,7 @@ def list_tasks(curs, project_id=None):
     qry_str = '''
     SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
       FROM task t
-           JOIN project p ON t.project_id=p.id
+           LEFT JOIN project p ON t.project_id=p.id
     '''
 
     if project_id is not None:
@@ -305,6 +306,11 @@ def process_log_command(curs, args):
                          (args[0], project_id) )
             print("Qtask: task id:{0} logged to project {1}".format(curs.lastrowid, project_label))
 
+    # 3 arguments, like: "Submitted timesheets" on 2015-01-13
+    elif len(args) == 3 and args[1] == 'on':
+        curs.execute("INSERT INTO task (label, time_added) VALUES (?, datetime(?))", (args[0],args[2]) )
+        print("Qtask: task id:{0} logged".format(curs.lastrowid))
+            
     # 5 elements, like: 5 hours against task 231
     elif len(args) == 5 and args[2] == 'against':
         print_error("Sorry, logging time against a task isn't yet implemented.")
