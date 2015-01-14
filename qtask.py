@@ -220,6 +220,7 @@ def process_list_command(curs, args):
                 print("#- No projects found -#")
             
         elif args[0] == 'work':
+            # ABSTRACTION BLOCK A
             curs.execute(
                 '''
                 SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
@@ -238,10 +239,41 @@ def process_list_command(curs, args):
             if work_count == 0:
                 print("#- No work logged -#")
 
-        elif len(args) == 2:
-            pass
         else:
             print_error("Qtask: Sorry, I don't know how to list {0}".format(args[0]))
+
+    # examples of two arguments
+    #   qtask list Annotation work
+    elif len(args) == 2:
+        # if the 2nd term is 'work' the first is assumed to be the project
+        if args[1] == 'work':
+            project_id = get_project_id_by_label(curs, args[0])
+            if project_id is None:
+                print_error("Qtask.  Couldn't list work in project {0} because the project wasn't found.".format(args[0]))
+            else:
+                # I want this to just work for now, but abstract his out with the block above with the same name
+                # ABSTRACTION BLOCK A
+                curs.execute(
+                    '''
+                    SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
+                      FROM task t
+                           JOIN project p ON t.project_id=p.id
+                     WHERE p.id = ?
+                    ORDER BY t.time_added DESC
+                    ''', (project_id,)
+                )
+            
+                work_count = 0
+
+                print("# Work logged\n# -----------")
+                for (task_label, time_added, time_logged, project_name) in curs:
+                    work_count += 1
+                    print("{0}\t{1}\t{2}\t{3}".format(task_label, project_name, time_added, time_logged))
+
+                if work_count == 0:
+                    print("#- No work logged -#")
+        else:
+            print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
 
 
 def process_log_command(curs, args):
