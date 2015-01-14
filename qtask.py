@@ -129,6 +129,31 @@ def initialize_db(file_path):
     conn.commit()
     curs.close()
 
+def list_tasks(curs, project_id=None):
+    qry_args = list()
+    qry_str = '''
+    SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
+      FROM task t
+           JOIN project p ON t.project_id=p.id
+    '''
+
+    if project_id is not None:
+        qry_str += " WHERE p.id = ? "
+        qry_args.append(project_id)
+
+    qry_str += " ORDER BY t.time_added DESC "
+    
+    curs.execute(qry_str, (qry_args) )
+    work_count = 0
+
+    print("# Work logged\n# -----------")
+    for (task_label, time_added, time_logged, project_name) in curs:
+        work_count += 1
+        print("{0}\t{1}\t{2}\t{3}".format(task_label, project_name, time_added, time_logged))
+
+    if work_count == 0:
+        print("#- No work logged -#")
+
     
 def print_error(msg):
     print(msg)
@@ -220,24 +245,7 @@ def process_list_command(curs, args):
                 print("#- No projects found -#")
             
         elif args[0] == 'work':
-            # ABSTRACTION BLOCK A
-            curs.execute(
-                '''
-                SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
-                  FROM task t
-                       JOIN project p ON t.project_id=p.id
-                  ORDER BY t.time_added DESC
-                '''
-            )
-            work_count = 0
-
-            print("# Work logged\n# -----------")
-            for (task_label, time_added, time_logged, project_name) in curs:
-                work_count += 1
-                print("{0}\t{1}\t{2}\t{3}".format(task_label, project_name, time_added, time_logged))
-
-            if work_count == 0:
-                print("#- No work logged -#")
+            list_tasks(curs)
 
         else:
             print_error("Qtask: Sorry, I don't know how to list {0}".format(args[0]))
@@ -251,29 +259,10 @@ def process_list_command(curs, args):
             if project_id is None:
                 print_error("Qtask.  Couldn't list work in project {0} because the project wasn't found.".format(args[0]))
             else:
-                # I want this to just work for now, but abstract his out with the block above with the same name
-                # ABSTRACTION BLOCK A
-                curs.execute(
-                    '''
-                    SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
-                      FROM task t
-                           JOIN project p ON t.project_id=p.id
-                     WHERE p.id = ?
-                    ORDER BY t.time_added DESC
-                    ''', (project_id,)
-                )
-            
-                work_count = 0
-
-                print("# Work logged\n# -----------")
-                for (task_label, time_added, time_logged, project_name) in curs:
-                    work_count += 1
-                    print("{0}\t{1}\t{2}\t{3}".format(task_label, project_name, time_added, time_logged))
-
-                if work_count == 0:
-                    print("#- No work logged -#")
+                list_tasks(curs, project_id=project_id)
         else:
             print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
+
 
 
 def process_log_command(curs, args):
