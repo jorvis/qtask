@@ -204,6 +204,24 @@ def print_help_for_command(cmd):
 
         """)
 
+    elif cmd == 'list':
+        print("""
+        Qtask help command: list
+        
+        The 'list' command is used to display things stored in the database such as projects or
+        work.  You can list things generally such as all work (by default) or describe specific
+        filtering criteria in a natural syntax.  Probably easiest with examples:
+
+        Example usage:
+
+            qtask list projects
+            qtask list work
+            qtask list annotation work
+            qtask list work in last 30 days
+            qtask list annotation work in last 1 week
+
+        """)
+        
     else:
         print_error("Qtask: Sorry, help for the command ({0}) is not yet implemented".format(cmd))
 
