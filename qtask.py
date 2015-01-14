@@ -5,27 +5,13 @@ For full command info and documentation please see the GitHub project page here:
 
 https://github.com/jorvis/qtask
 
-What follows are just development notes.
+You can also use the help command to get documentation for any individual command:
 
-............................................
-Example commands supported:
+qtask help
 
-    qtask init
- 
-    qtask add project annotation
- 
-    qtask log "Conference call with review panel"
-    qtask log "Added parsing script for latest version of tool X" to annotation
-    qtask log "Submitted timesheets" on 2015-01-13
-    qtask log 5 hours against task 231
+or
 
-    qtask list projects
-    qtask list work
-    qtask list annotation work
-    qtask list work in last 30 days
-    qtask list annotation work in last 1 week
-
-    qtask help log
+qtask help add
 
 """
 
@@ -70,10 +56,15 @@ def main():
                 process_add_command(curs, args.arglist[1], args.arglist[2])
 
         elif command == 'help':
-            if len(args.arglist) != 2:
-                print_error("Usage: qtask help <somecommand>")
-            else:
+            if len(args.arglist) == 1:
+                print("Qtask help:  Get help by passing any command name 'add', 'log', 'list', or 'init'.  For example:\n\n" \
+                      "\tqtask help add\n")
+
+            elif len(args.arglist) == 2:
                 print_help_for_command(args.arglist[1])
+            else:
+                print_error("Usage: qtask help <somecommand>")
+
 
         else:
             raise Exception("ERROR: Unrecognized qtask command: {0}".format(command))
@@ -188,6 +179,23 @@ def print_help_for_command(cmd):
         quotation marks.
         """)
 
+    elif cmd == 'help':
+        print("""
+        Qtask help command: help
+        
+        Looking for help on the help command itself?  You recursively sly devil.  
+
+        If you run the help command on its own, you'll get a list of available help commands:
+
+           qtask help
+
+        Pass the name of a command to get documentation on it:
+
+           qtask help log
+           qtask help add
+
+        """)
+
     elif cmd == 'log':
         print("""
         Qtask help command: log
@@ -200,7 +208,8 @@ def print_help_for_command(cmd):
         Example usage:
 
            qtask log "Installed latest version of BLAST"
-           qtask log "Created JBrowse instance" to t_parva
+           qtask log "Created JBrowse instance" to Annotation
+           qtask log "Submitted timesheets" on 2015-01-13
            qtask log 5 hours against task 231
 
         """)
