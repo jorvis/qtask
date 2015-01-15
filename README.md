@@ -18,7 +18,7 @@ First, initialize Qtask:
 Optionally, create a project:
 
 ```
-    qtask add project annotation
+    qtask add project Annotation
 ```
 
 Record work done, a meeting, whatever:
@@ -30,7 +30,7 @@ Record work done, a meeting, whatever:
 Or, if you want to link the task to a project when you log it:
 
 ```
-    qtask log "Added parsing script for latest version of tool X" to annotation
+    qtask log "Added parsing script for latest version of tool X" to Annotation
 ```
 
 If you're interested in actually logging time rather than just lists of work you
@@ -54,7 +54,7 @@ Show the projects you've added
 List all work for a project (most recent first)
 
 ```
-    qtask list annotation work
+    qtask list Annotation work
 ```
 
 You can also do time intervals (deltas)
@@ -66,7 +66,7 @@ You can also do time intervals (deltas)
 And, of course, limit these by project too
 
 ```
-    qtask list annotation work in last 1 week
+    qtask list Annotation work in last 2 weeks
 ```
 
 ### Generating reports (graphics)
