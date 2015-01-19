@@ -141,7 +141,7 @@ def list_tasks(curs, project_id=None):
     print("# Work logged\n# -----------")
     for (task_label, time_added, time_logged, project_name) in curs:
         work_count += 1
-        print("{0}\t{1}\t{2}\t{3}".format(task_label, project_name, time_added, time_logged))
+        print("{0}\t{1}\t{2}\t{3}".format(project_name, time_added, time_logged, task_label))
 
     if work_count == 0:
         print("#- No work logged -#")
