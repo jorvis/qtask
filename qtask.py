@@ -59,12 +59,10 @@ def main():
             if len(args.arglist) == 1:
                 print("Qtask help:  Get help by passing any command name 'add', 'log', 'list', or 'init'.  For example:\n\n" \
                       "\tqtask help add\n")
-
             elif len(args.arglist) == 2:
                 print_help_for_command(args.arglist[1])
             else:
                 print_error("Usage: qtask help <somecommand>")
-
 
         else:
             raise Exception("ERROR: Unrecognized qtask command: {0}".format(command))
@@ -210,6 +208,7 @@ def print_help_for_command(cmd):
            qtask log "Installed latest version of BLAST"
            qtask log "Created JBrowse instance" to Annotation
            qtask log "Submitted timesheets" on 2015-01-13
+           qtask log "Created bowtie2 index of genomes" to Annotation on 2015-01-21
            qtask log 5 hours against task 231
 
         """)
@@ -323,6 +322,18 @@ def process_log_command(curs, args):
     # 5 elements, like: 5 hours against task 231
     elif len(args) == 5 and args[2] == 'against':
         print_error("Sorry, logging time against a task isn't yet implemented.")
+
+    # 5 elements, like: "Created bowtie2 index of genomes" to Annotation on 2015-01-21
+    elif len(args) == 5 and args[1] == 'to' and args[3] == 'on':
+        project_label = args[2]
+        project_id = get_project_id_by_label(curs, project_label)
+
+        if project_id is None:
+            print_error("Qtask: ERROR: couldn't find project '{0}' to log work against".format(project_label))
+        else:
+            curs.execute("INSERT INTO task (label, time_added, project_id) VALUES (?, ?, ?)",
+                         (args[0], args[4], project_id) )
+            print("Qtask: task id:{0} logged to project {1} on {2}".format(curs.lastrowid, project_label, args[4]))
 
     else:
         print_error("Qtask: I didn't understand your log command.  See 'qtask help log' for examples")
