@@ -335,6 +335,18 @@ def process_log_command(curs, args):
                          (args[0], args[4], project_id) )
             print("Qtask: task id:{0} logged to project {1} on {2}".format(curs.lastrowid, project_label, args[4]))
 
+    # 5 elements, like: "Created bowtie2 index of genomes" on 2015-01-21 to Annotation
+    elif len(args) == 5 and args[3] == 'to' and args[1] == 'on':
+        project_label = args[4]
+        project_id = get_project_id_by_label(curs, project_label)
+
+        if project_id is None:
+            print_error("Qtask: ERROR: couldn't find project '{0}' to log work against".format(project_label))
+        else:
+            curs.execute("INSERT INTO task (label, time_added, project_id) VALUES (?, ?, ?)",
+                         (args[0], args[2], project_id) )
+            print("Qtask: task id:{0} logged to project {1} on {2}".format(curs.lastrowid, project_label, args[2]))
+
     else:
         print_error("Qtask: I didn't understand your log command.  See 'qtask help log' for examples")
 
