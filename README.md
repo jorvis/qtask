@@ -75,9 +75,13 @@ And, of course, limit these by project too
     qtask list Annotation work in last 2 weeks
 ```
 
-### Generating reports (graphics)
+### Generating reports
 
-Nothing here yet
+I often need to group my task by project and report these over some time interval:
+
+```
+qtask report work in last 4 weeks
+```
 
 
 ## Help

@@ -68,6 +68,12 @@ def main():
             else:
                 process_log_command(curs, args.arglist)
 
+        elif command == 'report':
+            if len(args.arglist) == 6:
+                process_report_command(curs, args.arglist)
+            else:
+                print_error("Usage: qtask report work in last <N> <units>.  Please see help for more examples")
+
         else:
             raise Exception("ERROR: Unrecognized qtask command: {0}".format(command))
 
@@ -242,6 +248,20 @@ def print_help_for_command(cmd):
             qtask list Annotation work in last 1 week
 
         """)
+
+    elif cmd == 'report':
+        print("""
+        Qtask help command: report
+        
+        The 'report' command is used group and display work logged by project over a given time
+        interval.
+
+        Example usage:
+
+            qtask report work in last 30 days
+            qtask report work in last 1 week
+        
+        """)
         
     else:
         print_error("Qtask: Sorry, help for the command ({0}) is not yet implemented".format(cmd))
@@ -319,24 +339,11 @@ def process_list_command(curs, args):
     #  qtask list work in last 1 week
     elif len(args) == 5:
         if args[1] == 'in' and args[2] == 'last':
-            quant = int(args[3])
-            unit = args[4]
-            delta = None
-            
-            if unit == 'day' or unit == 'days':
-                delta = datetime.timedelta(days=quant)
-            elif unit == 'week' or unit == 'weeks':
-                delta = datetime.timedelta(weeks=quant)
-            elif unit == 'month' or unit == 'months':
-                # Someone offer a clean way to support this?
-                print_error("Qtask: Sorry, can't display 'months', because it is imprecise.  Please try a specific number of weeks instead")
-            elif unit == 'year' or unit == 'years':
-                # python's module doesn't support years as imprecise.  Instead, we'll assume year=365 days
-                quant = quant * 365
-                delta = datetime.timedelta(days=quant)
-            else:
-                print_error("Qtask: Sorry, I couldn't recognize your list syntax (unit={0}?). Please see the examples and try again".format(unit))
+            delta = get_delta(int(args[3]), args[4])
 
+            if delta == None:
+                print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
+            
             list_tasks(curs, from_date="{0}".format(now - delta), until=str(now))
         else:
             print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
@@ -400,6 +407,75 @@ def process_log_command(curs, args):
 
     else:
         print_error("Qtask: I didn't understand your log command.  See 'qtask help log' for examples")
+
+def process_report_command(curs, args):
+    # get rid of the first argument, which was just the 'report' command
+    args.pop(0)
+    now = datetime.datetime.now()
+
+    # example: qtask report work in last 30 days
+    if args[0] == 'work':
+        if args[1] == 'in' and args[2] == 'last':
+            delta = get_delta(int(args[3]), args[4])
+
+            if delta == None:
+                print_error("Qtask: Sorry, I couldn't recognize your report syntax. Please see the examples and try again")
+
+            from_date = "{0}".format(now - delta)
+            until = str(now)
+
+            qry_str = '''
+            SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
+              FROM task t
+                   LEFT JOIN project p ON t.project_id=p.id
+                   WHERE t.time_added BETWEEN ? AND ? 
+            '''
+            curs.execute(qry_str, (from_date, until) )
+
+            projects = dict()
+
+            for (task_label, time_added, time_logged, project_name) in curs:
+                # 'None' doesn't work well
+                if project_name is None:
+                    project_name = 'Unassigned to a project'
+                
+                if project_name not in projects:
+                    projects[project_name] = list()
+
+                projects[project_name].append({'task_label': task_label, 'time_added': time_added})
+
+            for project_label in projects:
+                print("{0}".format(project_label))
+
+                for task in projects[project_label]:
+                    print("- {0}".format(task['task_label']))
+            
+        else:
+            print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
+    else:
+        report_error("Qtask: ERROR: I didn't understand your report command.  See 'qtask help report' for examples")
+
+def get_delta(quant, unit):
+    """
+    Returns a delta based on a given quantity and unit.  Valid units are:
+
+    day, days, week, weeks, year, years
+    """
+    delta = None
+
+    if unit == 'day' or unit == 'days':
+        delta = datetime.timedelta(days=quant)
+    elif unit == 'week' or unit == 'weeks':
+        delta = datetime.timedelta(weeks=quant)
+    elif unit == 'month' or unit == 'months':
+        # Someone offer a clean way to support this?
+        print_error("Qtask: Sorry, can't display 'months', because it is imprecise.  Please try a specific number of weeks instead")
+    elif unit == 'year' or unit == 'years':
+        # python's module doesn't support years as imprecise.  Instead, we'll assume year=365 days
+        quant = quant * 365
+        delta = datetime.timedelta(days=quant)
+
+    return delta
 
 if __name__ == '__main__':
     main()
