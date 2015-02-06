@@ -16,6 +16,7 @@ qtask help add
 """
 
 import argparse
+import datetime
 import os
 import sqlite3
 import sys
@@ -119,7 +120,7 @@ def initialize_db(file_path):
     conn.commit()
     curs.close()
 
-def list_tasks(curs, project_id=None):
+def list_tasks(curs, project_id=None, from_date=None, until=None):
     qry_args = list()
     qry_str = '''
     SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
@@ -131,7 +132,14 @@ def list_tasks(curs, project_id=None):
         qry_str += " WHERE p.id = ? "
         qry_args.append(project_id)
 
+    if from_date is not None:
+        qry_str += " WHERE t.time_added BETWEEN ? AND ? "
+        qry_args.append(from_date)
+        qry_args.append(until)
+
     qry_str += " ORDER BY t.time_added DESC "
+
+    print("QRY: {0}, ARGS: {1}".format(qry_str, qry_args))
     
     curs.execute(qry_str, (qry_args) )
     work_count = 0
@@ -237,7 +245,8 @@ def print_help_for_command(cmd):
         
 def process_add_command(curs, item_type, label):
     print("Attempting to insert project: {0}".format(label))
-
+    now = "{0}".format(datetime.datetime.now())
+    
     # parsing wouldn't work if any of these words were used as a project name
     project_reserved_words = ['work']
     
@@ -245,7 +254,7 @@ def process_add_command(curs, item_type, label):
         if label in project_reserved_words:
             print_error("Qtask: Sorry, the word '{0}' is reserved and can't be used for a project name.".format(label))
         
-        curs.execute("INSERT INTO project (label, time_added) VALUES (?, datetime('now'))", (label,) )
+        curs.execute("INSERT INTO project (label, time_added) VALUES (?, ?)", (label, now) )
         row_id = curs.lastrowid
         print("Qtask: Project '{0}' added to the database with id={1}".format(label, row_id))
         return row_id
@@ -287,19 +296,31 @@ def process_list_command(curs, args):
                 print_error("Qtask.  Couldn't list work in project {0} because the project wasn't found.".format(args[0]))
             else:
                 list_tasks(curs, project_id=project_id)
+
+        # if the 1st term is 'work' the following is chronological description.  E.g:
+        #  qtask list work today
+        elif args[0] == 'work':
+            if args[1] == 'today':
+                from_date = "{0} 00:00:00".format(datetime.date.today())
+                until_date = "{0}".format(datetime.datetime.now())
+                list_tasks(curs, from_date=from_date, until=until_date)
+
         else:
             print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
+
+    #elif len(args) == 
 
 
 
 def process_log_command(curs, args):
     # get rid of the first argument, which was just the 'log' command
     args.pop(0)
+    now = "{0}".format(datetime.datetime.now())
     
     # There are several different ways to call this.
     # 1 argument:  Must be a label only, no project association
     if len(args) == 1:
-        curs.execute("INSERT INTO task (label, time_added) VALUES (?, datetime('now'))", (args[0],) )
+        curs.execute("INSERT INTO task (label, time_added) VALUES (?, ?)", (args[0], now) )
         print("Qtask: task id:{0} logged".format(curs.lastrowid))
 
     # 3 arguments:  <label> to <project>
@@ -310,8 +331,8 @@ def process_log_command(curs, args):
         if project_id is None:
             print_error("Qtask: ERROR: couldn't find project '{0}' to log work against".format(project_label))
         else:
-            curs.execute("INSERT INTO task (label, time_added, project_id) VALUES (?, datetime('now'), ?)",
-                         (args[0], project_id) )
+            curs.execute("INSERT INTO task (label, time_added, project_id) VALUES (?, ?, ?)",
+                         (args[0], now, project_id) )
             print("Qtask: task id:{0} logged to project {1}".format(curs.lastrowid, project_label))
 
     # 3 arguments, like: "Submitted timesheets" on 2015-01-13
