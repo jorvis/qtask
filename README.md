@@ -57,6 +57,12 @@ List all work for a project (most recent first)
     qtask list Annotation work
 ```
 
+List any work you've logged today
+
+```
+    qtask list work today
+```
+
 You can also do time intervals (deltas)
 
 ```
