@@ -13,6 +13,9 @@ or
 
 qtask help add
 
+WARNINGS:
+For any time deltas based on a 'year', 365 days are used.
+
 """
 
 import argparse
@@ -139,7 +142,7 @@ def list_tasks(curs, project_id=None, from_date=None, until=None):
 
     qry_str += " ORDER BY t.time_added DESC "
 
-    print("QRY: {0}, ARGS: {1}".format(qry_str, qry_args))
+    #print("QRY: {0}, ARGS: {1}".format(qry_str, qry_args))
     
     curs.execute(qry_str, (qry_args) )
     work_count = 0
@@ -233,6 +236,7 @@ def print_help_for_command(cmd):
 
             qtask list projects
             qtask list work
+            qtask list work today
             qtask list Annotation work
             qtask list work in last 30 days
             qtask list Annotation work in last 1 week
@@ -264,6 +268,7 @@ def process_add_command(curs, item_type, label):
 def process_list_command(curs, args):
     # get rid of the first argument, which was just the 'list' command
     args.pop(0)
+    now = datetime.datetime.now()
 
     # There are several different ways to call this.
     # 1 argument: Currently only supports direct lists of 'projects' or 'work'
@@ -304,12 +309,37 @@ def process_list_command(curs, args):
                 from_date = "{0} 00:00:00".format(datetime.date.today())
                 until_date = "{0}".format(datetime.datetime.now())
                 list_tasks(curs, from_date=from_date, until=until_date)
-
+            else:
+                print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
         else:
             print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
 
-    #elif len(args) == 
+    # examples of four arguments
+    #  qtask list work in last 30 days
+    #  qtask list work in last 1 week
+    elif len(args) == 5:
+        if args[1] == 'in' and args[2] == 'last':
+            quant = int(args[3])
+            unit = args[4]
+            delta = None
+            
+            if unit == 'day' or unit == 'days':
+                delta = datetime.timedelta(days=quant)
+            elif unit == 'week' or unit == 'weeks':
+                delta = datetime.timedelta(weeks=quant)
+            elif unit == 'month' or unit == 'months':
+                # Someone offer a clean way to support this?
+                print_error("Qtask: Sorry, can't display 'months', because it is imprecise.  Please try a specific number of weeks instead")
+            elif unit == 'year' or unit == 'years':
+                # python's module doesn't support years as imprecise.  Instead, we'll assume year=365 days
+                quant = quant * 365
+                delta = datetime.timedelta(days=quant)
+            else:
+                print_error("Qtask: Sorry, I couldn't recognize your list syntax (unit={0}?). Please see the examples and try again".format(unit))
 
+            list_tasks(curs, from_date="{0}".format(now - delta), until=str(now))
+        else:
+            print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
 
 
 def process_log_command(curs, args):
