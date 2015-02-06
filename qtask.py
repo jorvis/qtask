@@ -41,19 +41,7 @@ def main():
         conn = sqlite3.connect(DB_FILE_PATH)
         curs = conn.cursor()
 
-        if command == 'log':
-            if len(args.arglist) < 2:
-                print_error("Usage: qtask log <description>.  Please see help for more examples")
-            else:
-                process_log_command(curs, args.arglist)
-
-        elif command == 'list':
-            if len(args.arglist) < 2:
-                print_error("Usage: qtask list <description>.  Please see help for more examples")
-            else:
-                process_list_command(curs, args.arglist)
-
-        elif command == 'add':
+        if command == 'add':
             if len(args.arglist) != 3:
                 print_error("Usage: qtask add project <foo>")
             else:
@@ -67,6 +55,18 @@ def main():
                 print_help_for_command(args.arglist[1])
             else:
                 print_error("Usage: qtask help <somecommand>")
+
+        elif command == 'list':
+            if len(args.arglist) < 2:
+                print_error("Usage: qtask list <description>.  Please see help for more examples")
+            else:
+                process_list_command(curs, args.arglist)
+                
+        elif command == 'log':
+            if len(args.arglist) < 2:
+                print_error("Usage: qtask log <description>.  Please see help for more examples")
+            else:
+                process_log_command(curs, args.arglist)
 
         else:
             raise Exception("ERROR: Unrecognized qtask command: {0}".format(command))
