@@ -329,6 +329,11 @@ def process_list_command(curs, args):
                 from_date = "{0} 00:00:00".format(datetime.date.today())
                 until_date = "{0}".format(datetime.datetime.now())
                 list_tasks(curs, from_date=from_date, until=until_date)
+            elif args[1] == 'yesterday':
+                delta = get_delta(1, 'day')
+                from_date = "{0} 00:00:00".format(datetime.date.today() - delta)
+                until_date = "{0} 23:59:59".format(datetime.date.today() - delta)
+                list_tasks(curs, from_date=from_date, until=until_date)
             else:
                 print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
         else:
