@@ -107,6 +107,9 @@ Or you can get a zip file of the most current code at:
     https://github.com/jorvis/qtask/archive/master.zip
 ```
 
+After that, just make sure python3 and the 'qtask' binary within
+the distribution are in your PATH.
+
 ## Problems?
 
 If you encounter any issues or have suggestions,  please submit to the [Issue tracking system](https://github.com/jorvis/qtask/issues)
