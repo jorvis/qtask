@@ -354,6 +354,9 @@ def process_list_command(curs, args):
         else:
             print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
 
+    else:
+        print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
+
 
 def process_log_command(curs, args):
     # get rid of the first argument, which was just the 'log' command
