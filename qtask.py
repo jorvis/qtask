@@ -56,7 +56,7 @@ def main():
             else:
                 print_error("Usage: qtask help <somecommand>")
 
-        elif command == 'list':
+        elif command == 'list' or command == 'report':
             if len(args.arglist) < 2:
                 print_error("Usage: qtask list <description>.  Please see help for more examples")
             else:
@@ -67,12 +67,6 @@ def main():
                 print_error("Usage: qtask log <description>.  Please see help for more examples")
             else:
                 process_log_command(curs, args.arglist)
-
-        elif command == 'report':
-            if len(args.arglist) == 6:
-                process_report_command(curs, args.arglist)
-            else:
-                print_error("Usage: qtask report work in last <N> <units>.  Please see help for more examples")
 
         else:
             raise Exception("ERROR: Unrecognized qtask command: {0}".format(command))
@@ -129,7 +123,7 @@ def initialize_db(file_path):
     conn.commit()
     curs.close()
 
-def list_tasks(curs, project_id=None, from_date=None, until=None):
+def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None):
     qry_args = list()
     qry_str = '''
     SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
@@ -154,10 +148,32 @@ def list_tasks(curs, project_id=None, from_date=None, until=None):
     work_count = 0
 
     print("# Work logged\n# -----------")
-    for (task_label, time_added, time_logged, project_name) in curs:
-        work_count += 1
-        print("{0}\t{1}\t{2}\t{3}".format(project_name, time_added, time_logged, task_label))
 
+    # this will only be used if there's some grouping applied
+    task_groups = dict()
+
+    if group_by == None:
+        for (task_label, time_added, time_logged, project_name) in curs:
+            work_count += 1
+            print("{0}\t{1}\t{2}\t{3}".format(project_name, time_added, time_logged, task_label))
+    elif group_by == 'project':
+        for (task_label, time_added, time_logged, project_name) in curs:
+            work_count += 1
+
+            if project_name == None:
+                project_name = 'Other (no project)'
+
+            if project_name not in task_groups:
+                task_groups[project_name] = list()
+
+            task_groups[project_name].append({'task_label':task_label, 'time_added':time_added, 'time_logged':time_logged})
+
+        for project_name in sorted(task_groups):
+            print("\n{0}\n{1}".format(project_name, '-' * len(project_name)))
+
+            for task in task_groups[project_name]:
+                print("{0}\t{1}\t{2}".format(task['time_added'], task['time_logged'], task['task_label']))
+            
     if work_count == 0:
         print("#- No work logged -#")
 
@@ -288,8 +304,15 @@ def process_add_command(curs, item_type, label):
 
 def process_list_command(curs, args):
     # get rid of the first argument, which was just the 'list' command
-    args.pop(0)
+    command = args.pop(0)
     now = datetime.datetime.now()
+
+    if command == 'list':
+        grouping = None
+    elif command == 'report':
+        grouping = 'project'
+    else:
+        raise Exception("Qtask:  Internal error:  process_list_command() called with command other than list or report.")
 
     # There are several different ways to call this.
     # 1 argument: Currently only supports direct lists of 'projects' or 'work'
@@ -307,7 +330,7 @@ def process_list_command(curs, args):
                 print("#- No projects found -#")
             
         elif args[0] == 'work':
-            list_tasks(curs)
+            list_tasks(curs, group_by=grouping)
 
         else:
             print_error("Qtask: Sorry, I don't know how to list {0}".format(args[0]))
@@ -321,7 +344,7 @@ def process_list_command(curs, args):
             if project_id is None:
                 print_error("Qtask.  Couldn't list work in project {0} because the project wasn't found.".format(args[0]))
             else:
-                list_tasks(curs, project_id=project_id)
+                list_tasks(curs, project_id=project_id, group_by=grouping)
 
         # if the 1st term is 'work' the following is chronological description.  E.g:
         #  qtask list work today
@@ -329,12 +352,12 @@ def process_list_command(curs, args):
             if args[1] == 'today':
                 from_date = "{0} 00:00:00".format(datetime.date.today())
                 until_date = "{0}".format(datetime.datetime.now())
-                list_tasks(curs, from_date=from_date, until=until_date)
+                list_tasks(curs, from_date=from_date, until=until_date, group_by=grouping)
             elif args[1] == 'yesterday':
                 delta = get_delta(1, 'day')
                 from_date = "{0} 00:00:00".format(datetime.date.today() - delta)
                 until_date = "{0} 23:59:59".format(datetime.date.today() - delta)
-                list_tasks(curs, from_date=from_date, until=until_date)
+                list_tasks(curs, from_date=from_date, until=until_date, group_by=grouping)
             else:
                 print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
         else:
@@ -350,7 +373,7 @@ def process_list_command(curs, args):
             if delta == None:
                 print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
             
-            list_tasks(curs, from_date="{0}".format(now - delta), until=str(now))
+            list_tasks(curs, from_date="{0}".format(now - delta), until=str(now), group_by=grouping)
         else:
             print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
 
@@ -417,52 +440,6 @@ def process_log_command(curs, args):
     else:
         print_error("Qtask: I didn't understand your log command.  See 'qtask help log' for examples")
 
-def process_report_command(curs, args):
-    # get rid of the first argument, which was just the 'report' command
-    args.pop(0)
-    now = datetime.datetime.now()
-
-    # example: qtask report work in last 30 days
-    if args[0] == 'work':
-        if args[1] == 'in' and args[2] == 'last':
-            delta = get_delta(int(args[3]), args[4])
-
-            if delta == None:
-                print_error("Qtask: Sorry, I couldn't recognize your report syntax. Please see the examples and try again")
-
-            from_date = "{0}".format(now - delta)
-            until = str(now)
-
-            qry_str = '''
-            SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
-              FROM task t
-                   LEFT JOIN project p ON t.project_id=p.id
-                   WHERE t.time_added BETWEEN ? AND ? 
-            '''
-            curs.execute(qry_str, (from_date, until) )
-
-            projects = dict()
-
-            for (task_label, time_added, time_logged, project_name) in curs:
-                # 'None' doesn't work well
-                if project_name is None:
-                    project_name = 'Unassigned to a project'
-                
-                if project_name not in projects:
-                    projects[project_name] = list()
-
-                projects[project_name].append({'task_label': task_label, 'time_added': time_added})
-
-            for project_label in projects:
-                print("{0}".format(project_label))
-
-                for task in projects[project_label]:
-                    print("- {0}".format(task['task_label']))
-            
-        else:
-            print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
-    else:
-        report_error("Qtask: ERROR: I didn't understand your report command.  See 'qtask help report' for examples")
 
 def get_delta(quant, unit):
     """
