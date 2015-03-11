@@ -363,9 +363,10 @@ def process_list_command(curs, args):
         else:
             print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
 
-    # examples of four arguments
+    # examples of five arguments
     #  qtask list work in last 30 days
     #  qtask list work in last 1 week
+    #  qtask list work between 2015-02-10 and 2015-02-17
     elif len(args) == 5:
         if args[1] == 'in' and args[2] == 'last':
             delta = get_delta(int(args[3]), args[4])
@@ -374,6 +375,12 @@ def process_list_command(curs, args):
                 print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
             
             list_tasks(curs, from_date="{0}".format(now - delta), until=str(now), group_by=grouping)
+
+        
+        elif args[1] == 'between' and args[3] == 'and':
+            from_date = "{0}".format(args[2])
+            until_date = "{0}".format(args[4])
+            list_tasks(curs, from_date=from_date, until=until_date, group_by=grouping)
         else:
             print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
 
