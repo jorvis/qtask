@@ -7,7 +7,7 @@ The entries themselves are stored in a SQLite3 database (nothing fancy, just a f
 
 ## Usage
 
-I tried to make the usage follow natural language as much as possible rather than use a lot of command-line switches.
+I tried to make the usage follow natural language as much as possible rather than use a lot of command-line switches.  Obviously, these examples assume you link 'qtask' somewhere in your PATH.
 
 First, initialize Qtask:
 
