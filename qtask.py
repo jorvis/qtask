@@ -126,7 +126,7 @@ def initialize_db(file_path):
 def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None):
     qry_args = list()
     qry_str = '''
-    SELECT t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
+    SELECT t.id, t.label AS task_label, t.time_added, t.time_logged, p.label AS project_name
       FROM task t
            LEFT JOIN project p ON t.project_id=p.id
     '''
@@ -142,8 +142,6 @@ def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None)
 
     qry_str += " ORDER BY t.time_added DESC "
 
-    #print("QRY: {0}, ARGS: {1}".format(qry_str, qry_args))
-    
     curs.execute(qry_str, (qry_args) )
     work_count = 0
 
@@ -153,11 +151,11 @@ def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None)
     task_groups = dict()
 
     if group_by == None:
-        for (task_label, time_added, time_logged, project_name) in curs:
+        for (task_id, task_label, time_added, time_logged, project_name) in curs:
             work_count += 1
-            print("{0}\t{1}\t{2}\t{3}".format(project_name, time_added, time_logged, task_label))
+            print("{0}\t{1}\t{2}\t{3}\t{4}".format(task_id, project_name, time_added, time_logged, task_label))
     elif group_by == 'project':
-        for (task_label, time_added, time_logged, project_name) in curs:
+        for (task_id, task_label, time_added, time_logged, project_name) in curs:
             work_count += 1
 
             if project_name == None:
@@ -166,13 +164,13 @@ def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None)
             if project_name not in task_groups:
                 task_groups[project_name] = list()
 
-            task_groups[project_name].append({'task_label':task_label, 'time_added':time_added, 'time_logged':time_logged})
+            task_groups[project_name].append({'id':task_id, 'task_label':task_label, 'time_added':time_added, 'time_logged':time_logged})
 
         for project_name in sorted(task_groups):
             print("\n{0}\n{1}".format(project_name, '-' * len(project_name)))
 
             for task in task_groups[project_name]:
-                print("{0}\t{1}\t{2}".format(task['time_added'], task['time_logged'], task['task_label']))
+                print("{0}\t{1}\t{2}\t{3}".format(task['task_id'], task['time_added'], task['time_logged'], task['task_label']))
             
     if work_count == 0:
         print("#- No work logged -#")
