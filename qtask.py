@@ -417,8 +417,27 @@ def process_log_command(curs, args):
         print("Qtask: task id:{0} logged".format(curs.lastrowid))
             
     # 5 elements, like: 5 hours against task 231
-    elif len(args) == 5 and args[2] == 'against':
-        print_error("Sorry, logging time against a task isn't yet implemented.")
+    elif len(args) == 5 and args[2] == 'against' and args[3] == 'task':
+        # convert the time passed to minutes
+        if args[1] == 'minutes':
+            time_to_add = int(args[0])
+        elif args[1] == 'hours':
+            time_to_add = int(args[0]) * 60
+        else:
+            print_error("Sorry, time can currently only be logged as minutes or hours")
+
+        # get the current time logged for the task
+        curs.execute('''SELECT time_logged FROM task WHERE id = ?''', (args[4],) )
+        row = curs.fetchone()
+        time_previously_logged = 0
+        if row:
+            if row[0] is not None:
+                time_previously_logged = row[0]
+        else:
+            print_error("Sorry, couldn't find a task with ID={0}".format(args[4]))
+
+        # increment it
+        curs.execute('''UPDATE task SET time_logged = ? WHERE id = ?''', (time_previously_logged + time_to_add, args[4]))
 
     # 5 elements, like: "Created bowtie2 index of genomes" to Annotation on 2015-01-21
     elif len(args) == 5 and args[1] == 'to' and args[3] == 'on':
