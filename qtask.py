@@ -153,6 +153,7 @@ def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None)
     if group_by == None:
         for (task_id, task_label, time_added, time_logged, project_name) in curs:
             work_count += 1
+            time_logged = time_logged_string(time_logged)
             print("{0}\t{1}\t{2}\t{3}\t{4}".format(task_id, project_name, time_added, time_logged, task_label))
     elif group_by == 'project':
         for (task_id, task_label, time_added, time_logged, project_name) in curs:
@@ -170,7 +171,8 @@ def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None)
             print("\n{0}\n{1}".format(project_name, '-' * len(project_name)))
 
             for task in task_groups[project_name]:
-                print("{0}\t{1}\t{2}\t{3}".format(task['task_id'], task['time_added'], task['time_logged'], task['task_label']))
+                time_logged = time_logged_string(task['time_logged'])
+                print("{0}\t{1}\t{2}\t{3}".format(task['task_id'], task['time_added'], time_logged, task['task_label']))
             
     if work_count == 0:
         print("#- No work logged -#")
@@ -463,6 +465,17 @@ def process_log_command(curs, args):
 
     else:
         print_error("Qtask: I didn't understand your log command.  See 'qtask help log' for examples")
+
+def time_logged_string(minutes):
+    if minutes is None:
+        return None
+    else:
+        if minutes < 60:
+            time_logged = "{0} minutes".format(minutes)
+        else:
+            time_logged = "{0:.1f} hours".format(minutes / 60)
+
+        return time_logged
 
 
 def get_delta(quant, unit):
