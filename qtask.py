@@ -28,16 +28,19 @@ def main():
     DB_FILE_PATH = "{0}/.qtask.db".format(os.environ['HOME'])
     
     parser = argparse.ArgumentParser( description='Command-line task logging, management and reporting')
+    parser.add_argument('-d', '--db_file', type=str, required=False, help='Use an alternative DB file' )
     parser.add_argument('arglist', metavar='N', type=str, nargs='+', help='All arguments to qtask to here.')
     args = parser.parse_args()
 
+    if args.db_file is not None:
+        DB_FILE_PATH = args.db_file
+    
     command = args.arglist[0]
     
     if command == 'init':
         initialize_db(DB_FILE_PATH)
 
     else:
-        # this creates it if it doesn't already exist
         conn = sqlite3.connect(DB_FILE_PATH)
         curs = conn.cursor()
 
