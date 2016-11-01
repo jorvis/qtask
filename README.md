@@ -33,6 +33,13 @@ Or, if you want to link the task to a project when you log it:
     qtask log "Added parsing script for latest version of tool X" to Annotation
 ```
 
+Dates/times recorded are, by default, the time you enter the log, but you can 
+instead pass a date:
+
+```
+    qtask log "Created bowtie2 index of genomes" to Annotation on 2016-10-30
+```
+
 If you're interested in actually logging time rather than just lists of work you
 can do that too.  When you log new work you'll get a task ID reported back on the
 command line for it.  To actually log hours against that, you can do it like this:
