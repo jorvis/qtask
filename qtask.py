@@ -133,13 +133,16 @@ def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None)
       FROM task t
            LEFT JOIN project p ON t.project_id=p.id
     '''
-
     if project_id is not None:
         qry_str += " WHERE p.id = ? "
         qry_args.append(project_id)
 
     if from_date is not None:
-        qry_str += " WHERE t.time_added BETWEEN ? AND ? "
+        if 'WHERE' in qry_str:
+            qry_str += " AND t.time_added BETWEEN ? AND ? "
+        else:
+            qry_str += " WHERE t.time_added BETWEEN ? AND ? "
+
         qry_args.append(from_date)
         qry_args.append(until)
 
@@ -384,6 +387,29 @@ def process_list_command(curs, args):
             from_date = "{0}".format(args[2])
             until_date = "{0}".format(args[4])
             list_tasks(curs, from_date=from_date, until=until_date, group_by=grouping)
+        else:
+            print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
+
+    # examples of six arguments
+    #  qtask list Annotation work in last 2 weeks
+    elif len(args) == 6:
+        project_id = get_project_id_by_label(curs, args[0])
+        if project_id is None:
+            print_error("Qtask.  Couldn't list work in project {0} because the project wasn't found.".format(args[0]))
+
+        if args[2] == 'in' and args[3] == 'last':
+            delta = get_delta(int(args[4]), args[5])
+
+            if delta == None:
+                print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
+            
+            list_tasks(curs, project_id=project_id, from_date="{0}".format(now - delta), until=str(now), group_by=grouping)
+
+        
+        elif args[1] == 'between' and args[3] == 'and':
+            from_date = "{0}".format(args[3])
+            until_date = "{0}".format(args[5])
+            list_tasks(curs, project_id=project_id, from_date=from_date, until=until_date, group_by=grouping)
         else:
             print_error("Qtask: Sorry, I couldn't recognize your list syntax. Please see the examples and try again")
 
