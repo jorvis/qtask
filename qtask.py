@@ -160,10 +160,12 @@ def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None)
         for (task_id, task_label, time_added, time_logged, project_name) in curs:
             work_count += 1
             time_logged = time_logged_string(time_logged)
+            time_added = time_added.split('.')[0]
             print("{0}\t{1}\t{2}\t{3}\t{4}".format(task_id, project_name, time_added, time_logged, task_label))
     elif group_by == 'project':
         for (task_id, task_label, time_added, time_logged, project_name) in curs:
             work_count += 1
+            time_added = time_added.split('.')[0]
 
             if project_name == None:
                 project_name = 'Other (no project)'
