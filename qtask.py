@@ -180,7 +180,7 @@ def list_tasks(curs, project_id=None, from_date=None, until=None, group_by=None)
 
             for task in task_groups[project_name]:
                 time_logged = time_logged_string(task['time_logged'])
-                print("{0}\t{1}\t{2}\t{3}".format(task['task_id'], task['time_added'], time_logged, task['task_label']))
+                print("{0}\t{1}\t{2}\t{3}".format(task['id'], task['time_added'], time_logged, task['task_label']))
             
     if work_count == 0:
         print("#- No work logged -#")
